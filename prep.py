@@ -1,12 +1,8 @@
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
 from pandas.api.types import is_string_dtype
-import sys
 
-def prep(parent_dir = "", one_hot_num = 20):
-    df_train = pd.read_csv(parent_dir + "/train.csv")
-    df_test = pd.read_csv(parent_dir + "/test.csv")
-
+def prep(df_test, df_train, one_hot_num = 20, omit=[], dropna=False):
     train_cols = df_train.columns
     test_cols = df_test.columns
 
@@ -16,10 +12,14 @@ def prep(parent_dir = "", one_hot_num = 20):
 
     key_cols = df_train[cols_diff]
 
-    df_train = df_train.dropna()
+    if dropna:
+        df_train = df_train.dropna()
 
     keep_cols = []
     for col in test_cols:
+        if col in omit:
+            keep_cols.append(col)
+            continue
         uniques = df_train[col].unique()
         if is_numeric_dtype(df_train[col]) and is_numeric_dtype(df_test[col]):
             keep_cols.append(col)
@@ -39,6 +39,16 @@ def prep(parent_dir = "", one_hot_num = 20):
     return df_train, df_test, key_cols
 
 def drop_cols(df, cols):
-    if cols in df.columns:
-        return df[list(set(df.columns) - set(cols))]
-
+    cols_set = set(cols)
+    df_cols_set = set(df.columns)
+    if cols_set <= df_cols_set:
+        return df[list(df_cols_set - cols_set)]
+    
+def split_cols(df, cols):
+    cols_set = set(cols)
+    df_cols_set = set(df.columns)
+    if not cols_set <= df_cols_set:
+        return df, None
+    partition = df[cols]
+    return df[list(df_cols_set - cols_set)], partition
+    
