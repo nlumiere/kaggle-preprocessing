@@ -34,10 +34,10 @@ def prep(df_test, df_train, one_hot_num = 20, omit=[], dropna=False):
                 keep_cols.append(e)
                 df_train[e] = df_train[col] == e
                 df_test[e] = df_test[col] == e
-    np_train = np.asarray(df_train[keep_cols])
-    np_test = np.asarray(df_test[keep_cols])
+    df_train = df_train[keep_cols]
+    df_test = df_test[keep_cols]
 
-    return np_train, np_test, key_cols
+    return df_train, df_test, key_cols
 
 def drop_cols(df, cols):
     cols_set = set(cols)
